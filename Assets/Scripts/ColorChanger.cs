@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class ColorChanger : MonoBehaviour
 {
-    // Start is called before the first frame update
     void Start()
     {
-        
-    }
+        // Get the Renderer component attached to the child GameObject
+        Renderer renderer = GetComponentInChildren<Renderer>();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        // Generate a random color
+        Color randomColor = new Color(Random.value, Random.value, Random.value);
+
+        // Assign the random color to the material's color property
+        renderer.material.color = randomColor;
     }
 }
