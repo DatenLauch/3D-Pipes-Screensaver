@@ -353,7 +353,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0339d25f7e06239498aac4ea052379d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  randomizeGeneratorAtStart: 1
   spawnAreaSize: 10
   spawnIntervall: 0.1
   startDelay: 1
