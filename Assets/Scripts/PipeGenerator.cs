@@ -7,9 +7,8 @@ using UnityEngine;
 // ### This script contains the logic to generate pipes as seen on the windows 98 3D Pipe Screensaver.       ###
 // ### Attach this script to an empty gameobject and the gameobject will wander around a cubic area          ###
 // ### to fill the space with colorful pipes!                                                                ###
+// ###                                                                                                       ###
 // ### Spawn area and other spawn behaviour can be adjusted within the editor.                               ###
-// ### If you plan to use differernt pipe assets, keep the pipe size below 0.5 units, rotate horizontally    ###
-// ### and set the pipe's pivot point to -0.5 to avoid orientation or clipping issues.                       ###
 // ### _____________________________________________________________________________________________________ ###
 // ### How it works TL;DR:                                                                                   ###
 // ### - Generator tries to find a valid location, moves to location and spawns a pipe behind the generator  ###
@@ -20,32 +19,28 @@ using UnityEngine;
 public class PipeGenerator : MonoBehaviour
 {
     [SerializeField]
-    bool randomizeGeneratorAtStart;
+    private float spawnAreaSize;
     [SerializeField]
-    float spawnAreaSize;
+    private float spawnIntervall;
     [SerializeField]
-    float spawnIntervall;
-    [SerializeField]
-    float startDelay;
+    private float startDelay;
 
     [SerializeField]
-    GameObject pipePrefab;
+    private GameObject pipePrefab;
     [SerializeField]
-    GameObject jointPrefab;
+    private GameObject jointPrefab;
 
     Dictionary<Vector3Int, GameObject> pipes;
+    private Color pipeColor;
 
     void Start()
     {
         // pipes keeps track of all pipe locations to avoid collisions
         pipes = new Dictionary<Vector3Int, GameObject>();
+        pipeColor = new Color(); 
 
-        if (randomizeGeneratorAtStart)
-        {
-            RandomizeGenerator();
-        }
-
-        // starts the pipe generation loop (pipe spawn parameters can be set in editor)
+        // randomizes generator then starts the pipe generation loop (pipe spawn parameters can be set in editor)
+        RandomizeGenerator();
         InvokeRepeating("GeneratePipes", startDelay, spawnIntervall);
     }
 
@@ -53,7 +48,7 @@ public class PipeGenerator : MonoBehaviour
     private void GeneratePipes()
     {
         PositionGeneratorAtValidLocation();
-        SpawnPipe();
+        SpawnPipe(pipeColor);
     }
 
     // generator gets a random start position and rotation
@@ -90,10 +85,11 @@ public class PipeGenerator : MonoBehaviour
             EditorApplication.isPlaying = false;
             Debug.Log("Could not generate a random generator location");
         }
-        // when valid random position, the generator is set to it and spawns an innitial joint
+        // when valid random position, the generator is set to it and sets color for the new pipe chain
         else
         {
             transform.position = randomPosition;
+            pipeColor = new Color(Random.value, Random.value, Random.value);
         }
     }
 
@@ -165,7 +161,7 @@ public class PipeGenerator : MonoBehaviour
             {
                 transform.LookAt(testDestination);
                 transform.position = testDestination;
-                SpawnJoint();
+                SpawnJoint(pipeColor);
                 return true;
             }
             else
@@ -189,11 +185,11 @@ public class PipeGenerator : MonoBehaviour
         else
             return false;
     }
-
-    private GameObject SpawnPipe()
+    private GameObject SpawnPipe(Color color)
     {
-        // create a pipe based on generator position and rotation
+        // create a pipe based on generator position, rotation and provided color
         GameObject pipeInstance = Instantiate(pipePrefab, transform.position, transform.rotation);
+        pipeInstance.GetComponent<ColorChanger>().color = color;
 
         // add the pipe into the pipe dictionary
         Vector3 floatPosition = pipeInstance.transform.position;
@@ -202,10 +198,11 @@ public class PipeGenerator : MonoBehaviour
         return pipeInstance;
     }
 
-    private GameObject SpawnJoint()
+    private GameObject SpawnJoint(Color color)
     {
         // create a pipe joint based on generator position and rotation
         GameObject jointInstance = Instantiate(jointPrefab, transform.position, transform.rotation);
+        jointInstance.GetComponent<ColorChanger>().color = color;
         return jointInstance;
     }
 }
